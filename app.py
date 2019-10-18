@@ -286,8 +286,6 @@ def edit_artist(artist_id):
       "seeking_description": artist.seeking_description,
       "image_link": artist.image_link
     }
-
-    # TODO: populate form with fields from artist with ID <artist_id>
     return render_template('forms/edit_artist.html', form=form, artist=artist)
 
 
