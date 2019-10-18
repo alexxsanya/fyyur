@@ -141,9 +141,11 @@ def show_venue(venue_id):
     
     if venue is None:
       flash('Venue with ID -' + str(venue_id) + ' doesn\'s exist.')
-      return render_template('pages/home.html')
+      return render_template('errors/404.html')
   except:
     print(sys.exc_info())
+    flash('Server error occured accessing venue ID -' + str(venue_id))
+    return render_template('errors/404.html')
 
   return render_template('pages/show_venue.html', venue=venue)
 
@@ -181,6 +183,7 @@ def create_venue_submission():
     db.session.rollback()
     print(sys.exc_info())
     flash('An error occurred. Venue ' + request.form['name'] + ' could not be listed.')
+    return render_template('errors/404.html')
   finally:
     db.session.close()
   
