@@ -13,6 +13,7 @@ from logging import Formatter, FileHandler
 from flask_wtf import Form
 from forms import *
 from flask_migrate import Migrate
+import sys
 #----------------------------------------------------------------------------#
 # App Config.
 #----------------------------------------------------------------------------#
@@ -22,8 +23,6 @@ moment = Moment(app)
 app.config.from_object('config')
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
-
-# TODO: connect to a local postgresql database
 
 #----------------------------------------------------------------------------#
 # Models.
@@ -51,7 +50,6 @@ class Venue(db.Model):
   seeking_description = db.Column(db.String(500))
   artist = db.relationship('Artist', secondary=shows,
     backref = db.backref('venue', lazy=True))
-  # TODO: implement any missing fields, as a database migration using Flask-Migrate - Done
 
 class Artist(db.Model):
   __tablename__ = 'artist'
@@ -67,9 +65,6 @@ class Artist(db.Model):
   website = db.Column(db.String(120))
   seeking_venue =  db.Column(db.Boolean)
   seeking_description = db.Column(db.String(500))
-  # TODO: implement any missing fields, as a database migration using Flask-Migrate - Done
-
-# TODO Implement Show and Artist models, and complete all model relationships and properties, as a database migration.
 
 #----------------------------------------------------------------------------#
 # Filters.
@@ -236,11 +231,31 @@ def create_venue_submission():
   # TODO: insert form data as a new Venue record in the db, instead
   # TODO: modify data to be the data object returned from db insertion
 
-  # on successful db insert, flash success
-  flash('Venue ' + request.form['name'] + ' was successfully listed!')
-  # TODO: on unsuccessful db insert, flash an error instead.
-  # e.g., flash('An error occurred. Venue ' + data.name + ' could not be listed.')
-  # see: http://flask.pocoo.org/docs/1.0/patterns/flashing/
+  try:
+    venue = Venue(
+        name = request.form['name'],
+        city = request.form['city'],
+        state = request.form['state'],
+        address = request.form['address'],
+        phone = request.form['phone'],
+        image_link = request.form['image_link'],
+        facebook_link = request.form['facebook_link'],
+        genre = str(request.form.getlist('genres')),
+        website = request.form['website'],
+        seeking_talent = True if request.form['seeking_talent'] == 'y' else False,
+        seeking_description = request.form['seeking_description'],
+    )
+    db.session.add(venue)
+    db.session.commit()
+    flash('Venue ' + request.form['name'] + ' was successfully listed!')
+  except:
+    db.session.rollback()
+    error = True
+    print(sys.exc_info())
+    flash('An error occurred. Venue ' + request.form['name'] + ' could not be listed.')
+  finally:
+    db.session.close()
+  
   return render_template('pages/home.html')
 
 @app.route('/venues/<venue_id>', methods=['DELETE'])
