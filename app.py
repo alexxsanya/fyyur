@@ -176,6 +176,11 @@ def create_venue_form():
 def create_venue_submission():
     # TODO: insert form data as a new Venue record in the db, instead
     # TODO: modify data to be the data object returned from db insertion
+    seeking_talent = False
+    try:
+      seeking_talent = request.form['seeking_talent']
+    except:
+      seeking_talent = False
 
     try:
         venue = Venue(
@@ -188,7 +193,7 @@ def create_venue_submission():
             facebook_link=request.form['facebook_link'],
             genre=str(request.form.getlist('genres')),
             website=request.form['website'],
-            seeking_talent=True if request.form['seeking_talent'] == 'y' else False,
+            seeking_talent= seeking_talent,
             seeking_description=request.form['seeking_description'],
         )
         db.session.add(venue)
