@@ -229,7 +229,19 @@ def delete_venue(venue_id):
 
     # BONUS CHALLENGE: Implement a button to delete a Venue on a Venue Page, have it so that
     # clicking that button delete it from the db then redirect the user to the homepage
-    return None
+
+    venue = Venue.query.get(venue_id)
+    try:
+        db.session.delete(venue)
+        db.session.commit()
+        return 'success'
+    except:
+        db.session.rollback()
+        print(sys.exc_info())
+        return 'error'
+    finally:
+        db.session.close()
+    return 'None'
 
 #  Artists
 #  ----------------------------------------------------------------
