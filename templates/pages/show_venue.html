@@ -44,6 +44,10 @@
 	</div>
 	<div class="col-sm-6">
 		<img src="{{ venue.image_link }}" alt="Venue Image" />
+		<input type="button" value="Delete Venue" 
+			id='delete-btn'
+			data-venue="{{venue.id}}"
+			class="btn btn-primary btn-lg btn-block">
 	</div>
 </div>
 <section>
@@ -74,6 +78,25 @@
 		{% endfor %}
 	</div>
 </section>
-
+<script type="text/javascript">
+	const del_btn = document.getElementById('delete-btn')
+	del_btn.onclick = function(e){
+		e.preventDefault
+		const venueId = e.target.dataset['venue'];
+		url = `/venues/${venueId}`
+		console.log(venueId, url)
+		fetch(url,{
+		  method: 'DELETE',
+		  headers: {
+            'Content-Type': 'application/json'
+          }
+		})
+		.then(() => {
+			window.location = ('/')
+		})
+		.catch(error => {
+			console.error(error)
+		})
+	}
+</script>
 {% endblock %}
-
