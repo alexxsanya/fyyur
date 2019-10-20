@@ -15,6 +15,7 @@ from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
 import sys
 import ast
+import datetime
 #----------------------------------------------------------------------------#
 # App Config.
 #----------------------------------------------------------------------------#
@@ -29,7 +30,7 @@ migrate = Migrate(app, db)
 # Models.
 #----------------------------------------------------------------------------#
 
-shows = db.Table('shows',
+show_items = db.Table('show_items',
                  db.Column('venue_id', db.Integer, db.ForeignKey(
                      'venue.id'), primary_key=True),
                  db.Column('artist_id', db.Integer, db.ForeignKey(
@@ -52,7 +53,7 @@ class Venue(db.Model):
     website = db.Column(db.String(120))
     seeking_talent = db.Column(db.Boolean)
     seeking_description = db.Column(db.String(500))
-    artist = db.relationship('Artist', secondary=shows,
+    artist = db.relationship('Artist', secondary=show_items,
                              backref=db.backref('venue', lazy=True))
 
 
@@ -70,6 +71,16 @@ class Artist(db.Model):
     website = db.Column(db.String(120))
     seeking_venue = db.Column(db.Boolean)
     seeking_description = db.Column(db.String(500))
+
+class Shows(db.Model):
+    __tablename__ = 'shows'
+
+    id = db.Column( db.Integer, primary_key=True)
+    venue_id = db.Column( db.Integer, db.ForeignKey(
+                     'venue.id'), primary_key=True)
+    artist_id = db.Column( db.Integer, db.ForeignKey(
+                     'artist.id'), primary_key=True)
+    db.Column('start_time', db.DateTime, nullable=False)
 
 #----------------------------------------------------------------------------#
 # Filters.
@@ -437,13 +448,32 @@ def create_shows():
 def create_show_submission():
     # called to create new shows in the db, upon submitting new show listing form
     # TODO: insert form data as a new Show record in the db, instead
+    try:
+        
+        venue_id = request.form['venue_id']
+        artist_id = request.form['artist_id']
+        start_time = request.form['start_time']
+        f_d = datetime.datetime.strptime(start_time, '%Y-%m-%d %H:%M:%S')
+        show = Shows(
+            venue_id = venue_id,
+            artist_id = artist_id,
+            start_time = f_d
+        )
 
-    # on successful db insert, flash success
-    flash('Show was successfully listed!')
-    # TODO: on unsuccessful db insert, flash an error instead.
-    # e.g., flash('An error occurred. Show could not be listed.')
-    # see: http://flask.pocoo.org/docs/1.0/patterns/flashing/
-    return render_template('pages/home.html')
+        # db.session.add(show)
+        # db.session.commit()
+
+        return (str(f_d.date()) + ' ' + start_time)
+        flash('Show was successfully listed!')
+    except:
+        db.session.rollback()
+        print(sys.exc_info())
+        flash('An error occurred. Show could not be listed.')
+        return render_template('pages/home.html')
+    finally:
+        db.session.close()
+
+    return '1233'
 
 
 @app.errorhandler(404)
