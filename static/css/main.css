@@ -209,3 +209,8 @@ h2.monospace {
 .subtitle {
   opacity: 0.5;
 }
+
+input#delete-btn {
+  width: 200px;
+  margin: 10px 0;
+}
