@@ -138,3 +138,4 @@ To start and run the local development server,
   ```
 
 4. Navigate to Home page [http://localhost:5000](http://localhost:5000)
+5. Navigate to [Database Models](https://dbdiagram.io/d/5db2051302e6e93440f29b9d)
