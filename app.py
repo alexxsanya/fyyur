@@ -115,6 +115,10 @@ def index():
 def venues():
     # TODO: replace with real venues data.
     #       num_shows should be aggregated based on number of upcoming shows per venue.
+
+    venues = Venue.query.group_by(Venue.id).all()
+
+    print(venues)
     data = [{
         "city": "San Francisco",
         "state": "CA",
@@ -224,11 +228,6 @@ def create_venue_submission():
 
 @app.route('/venues/<venue_id>', methods=['DELETE'])
 def delete_venue(venue_id):
-    # TODO: Complete this endpoint for taking a venue_id, and using
-    # SQLAlchemy ORM to delete a record. Handle cases where the session commit could fail.
-
-    # BONUS CHALLENGE: Implement a button to delete a Venue on a Venue Page, have it so that
-    # clicking that button delete it from the db then redirect the user to the homepage
 
     venue = Venue.query.get(venue_id)
     try:
