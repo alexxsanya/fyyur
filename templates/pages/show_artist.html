@@ -41,10 +41,6 @@
 	</div>
 	<div class="col-sm-6">
 		<img src="{{ artist.image_link }}" alt="Artist Image" />
-		<input type="button" value="Delete Artist" 
-			id='delete-btn'
-			data-artist="{{artist.id}}"
-			class="btn btn-primary btn-lg btn-block" />
 	</div>
 </div>
 <section>
@@ -75,6 +71,5 @@
 		{% endfor %}
 	</div>
 </section>
-
 {% endblock %}
 
