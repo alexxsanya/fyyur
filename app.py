@@ -30,57 +30,113 @@ migrate = Migrate(app, db)
 # Models.
 #----------------------------------------------------------------------------#
 
-show_items = db.Table('show_items',
-                 db.Column('venue_id', db.Integer, db.ForeignKey(
-                     'venue.id'), primary_key=True),
-                 db.Column('artist_id', db.Integer, db.ForeignKey(
-                     'artist.id'), primary_key=True),
-                 db.Column('start_time', db.DateTime, nullable=False)
-                 )
+class Location(db.Model):
+    __tablename__ = 'location'
+    id = db.Column(db.Integer, primary_key=True)
+    city = db.Column(db.String(120))
+    state = db.Column(db.String(120))
+    address = db.Column(db.String(120))
 
+    venue = db.relationship("Venue", backref=db.backref("location", lazy=True))
+    artist = db.relationship("Artist", backref=db.backref("location", lazy=True))
 
+    def __repr__(self):
+        return f'<Location {self.address} in {self.city} >'
+
+class Contact(db.Model):
+    __tablename__ = 'contact'
+    id = db.Column(db.Integer, primary_key=True)
+    phone = db.Column(db.String(120))
+    facebook_link = db.Column(db.String(120))
+    website = db.Column(db.String(120))
+
+    venue = db.relationship("Venue", backref=db.backref("contact", lazy=True))
+    artist = db.relationship("Artist", backref=db.backref("contact", lazy=True))
+
+    def __repr__(self):
+        return f'<Contact {self.phone} - {self.website} >'
+
+class Genre(db.Model):
+    __tablename__ = 'Genres'
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(120))
+
+    venue = db.relationship("Venue", backref=db.backref("contact", lazy=True))
+    artist = db.relationship("Artist", backref=db.backref("contact", lazy=True))
+
+    def __repr__(self):
+        return f'<Genre {self.name} >'
+ 
 class Venue(db.Model):
     __tablename__ = 'venue'
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String)
-    city = db.Column(db.String(120))
-    state = db.Column(db.String(120))
-    address = db.Column(db.String(120))
-    phone = db.Column(db.String(120))
     image_link = db.Column(db.String(500))
-    facebook_link = db.Column(db.String(120))
-    genre = db.Column(db.String(120))
-    website = db.Column(db.String(120))
     seeking_talent = db.Column(db.Boolean)
     seeking_description = db.Column(db.String(500))
-    artist = db.relationship('Artist', secondary=show_items,
+    contact_id = db.Column(db.Integer, db.ForeignKey('contact.id'), nullable=False)
+    artist = db.relationship('Artist', secondary=shows,
                              backref=db.backref('venue', lazy=True))
+    genres = db.relationship("Genre", secondary=venue_genre,
+                             backref=db.backref('venues', lazy=True))
+    location = db.relationship("Location", secondary=venue_location,
+                             backref=db.backref('venues', lazy=True))
 
+    def __repr__(self):
+        return f'<Venue {self.name} >'
 
 class Artist(db.Model):
     __tablename__ = 'artist'
 
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String)
-    city = db.Column(db.String(120))
-    state = db.Column(db.String(120))
-    phone = db.Column(db.String(120))
-    genres = db.Column(db.String(120))
     image_link = db.Column(db.String(500))
-    facebook_link = db.Column(db.String(120))
-    website = db.Column(db.String(120))
     seeking_venue = db.Column(db.Boolean)
     seeking_description = db.Column(db.String(500))
+    contact_id = db.Column(db.Integer, db.ForeignKey('contact.id'), nullable=False)
+    genres = db.relationship("Genre", secondary=artist_genre,
+                             backref=db.backref('artist', lazy=True))
+    location = db.relationship("Location", secondary=artist_location,
+                             backref=db.backref('artist', lazy=True))
+
+    def __repr__(self):
+        return f'<Artist {self.name} >'
 
 class Shows(db.Model):
     __tablename__ = 'shows'
 
     id = db.Column( db.Integer, primary_key=True)
     venue_id = db.Column( db.Integer, db.ForeignKey(
-                     'venue.id'), primary_key=True)
+                     'venue.id'), nullable=False)
     artist_id = db.Column( db.Integer, db.ForeignKey(
-                     'artist.id'), primary_key=True)
-    db.Column('start_time', db.DateTime, nullable=False)
+                     'artist.id'), ullable=False)
+    start_time = db.Column(db.DateTime, nullable=False)
+
+    venue = db.relationship("Venue", backref=db.backref("shows", lazy=True))
+    artist = db.relationship("Artist", backref=db.backref("shows", lazy=True))
+
+    def __repr__(self):
+        return f'<Show {artist.name} is at {venue.name} >'
+
+venue_genre = db.Table('venue_genre',
+    db.Column('venue_id', db.Integer, db.ForeignKey('venue.id')),
+    db.Column('genre_id', db.Integer, db.ForeignKey('genre.id'))
+)
+
+artist_genre = db.Table('artist_genre',
+    db.Column('artist_id', db.Integer, db.ForeignKey('artist.id')),
+    db.Column('genre_id', db.Integer, db.ForeignKey('genre.id'))
+)
+
+artist_location = db.Table('artist_location',
+    db.Column('artist_id', db.Integer, db.ForeignKey('artist.id')),
+    db.Column('location_id', db.Integer, db.ForeignKey('location.id'))
+)
+
+venue_location = db.Table('venue_location',
+    db.Column('venue_id', db.Integer, db.ForeignKey('venue.id')),
+    db.Column('location_id', db.Integer, db.ForeignKey('location.id'))
+)
 
 #----------------------------------------------------------------------------#
 # Filters.
